@@ -1,42 +1,70 @@
 <template>
     <div id="home" class="wrapper">
-    <nav-bar  class="home-nav"> <div slot="center">购物街</div></nav-bar>
-    <home-swiper :banners="banners"></home-swiper>
-    <recommend-view :recommends="recommends"></recommend-view>
-    <feature-view/>
+        <nav-bar  class="home-nav"> <div slot="center">购物街</div></nav-bar>
+        <home-swiper :banners="banners"></home-swiper>
+        <recommend-view :recommends="recommends"></recommend-view>
+        <feature-view/>
+        <TabControl class="tab-control" :titles="['流行','新款','精选']"></TabControl>
+        <goods-list></goods-list>
     </div>
 </template>
 
 <script>
     import NavBar from "../../components/common/navbar/NavBar";
+    import TabControl from "../../components/content/tabControl/TabControl";
     import HomeSwiper from "./childCom/HomeSwiper";
     import RecommendView from "./childCom/RecommendView";
     import FeatureView from "./childCom/FeatureView";
+    import GoodsList from "../../components/content/goods/GoodsList";
 
-
-    import {getHomeData} from "../../network/home";
+    import {getHomeData,getHomeGood} from "../../network/home";
     export default {
         name: "Home",
         components:{
             NavBar,
             HomeSwiper,
             RecommendView,
-            FeatureView
+            FeatureView,
+            TabControl,
+            GoodsList
         },
         data(){
             return {
                 banners:[],
-                recommends:[]
+                recommends:[],
+                goods:{
+                    'pop':{page:0,list:[]},
+                    'news':{page:0,list:[]},
+                    'sell':{page:0,list:[]},
+                }
             }
         },
         created() {
-            getHomeData()
-            .then(res => {
+
+            this.getHomeData();
+
+
+            this.getHomeGood('pop');
+            this.getHomeGood('new');
+            this.getHomeGood('sell');
+        },
+        methods:{
+            getHomeData(){
+                getHomeData().then(res => {
                 console.log(res);
                 this.banners = res.data.banner.list;
                 this.recommends = res.data.recommend.list;
             })
+        },
+            getHomeGood(type){
+                const page = ths.goods[type].page +1;
+                getHomeGood(type,page).then(res => {
+                    this.goods[type].list.push(...res.data.list);
+                    this.goods[type].page += 1
+                })
+            }
         }
+
     }
 </script>
 
